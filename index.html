@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Fotovoltaico Off-Grid Educativo - UFLO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --navy: #0b1e33;
+            --navy-2: #13293f;
+            --steel: #3a5169;
+            --sky: #7dd3fc;
+            --sun: #fbbf24;
+            --sun-deep: #d97706;
+            --paper: #eef3f7;
+            --ink: #1c2b3a;
+            --ink-soft: #52697d;
+            --line: #d7e2ea;
+            --good: #16a085;
+            --warn-bg: #fff4dd;
+            --warn-border: #f0b429;
+            --warn-ink: #7a4d00;
+        }
+        *{ box-sizing: border-box; }
+        body{
+            font-family: 'IBM Plex Sans', Arial, sans-serif;
+            background: var(--paper);
+            background-image:
+                linear-gradient(var(--line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--line) 1px, transparent 1px);
+            background-size: 34px 34px;
+            color: var(--ink);
+            margin: 0;
+            padding: 28px 16px;
+            display: flex;
+            justify-content: center;
+        }
+        .wrapper{
+            max-width: 940px;
+            width: 100%;
+            background: #ffffff;
+            padding: 30px 32px 36px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            box-shadow: 0 20px 45px rgba(11,30,51,0.10);
+        }
+
+        /* Encabezado institucional */
+        .brand-header{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 18px;
+            gap: 20px;
+        }
+        .brand-logo{ max-width: 130px; height: auto; }
+        .academic-title{
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--good);
+            font-weight: 600;
+            text-align: right;
+            max-width: 52%;
+            line-height: 1.4;
+        }
+
+        /* Título + badge */
+        .title-section{ margin-bottom: 24px; text-align: center; }
+        h1{
+            color: var(--navy);
+            margin: 0 0 6px 0;
+            font-size: 27px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+        p.sub{ color: var(--ink-soft); margin: 0 0 12px 0; font-size: 15px; }
+        .badge-preliminar{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--warn-bg);
+            color: var(--warn-ink);
+            border: 1px solid var(--warn-border);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            padding: 5px 13px;
+            border-radius: 999px;
+        }
+        .badge-preliminar::before{ content: "●"; color: var(--sun-deep); font-size: 9px; }
+
+        /* Layout principal */
+        .main-layout{ display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 26px; }
+        .panel-controls{
+            flex: 1; min-width: 300px;
+            background: var(--paper);
+            padding: 20px 22px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+        }
+        .panel-controls h2, .panel-results h2{
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--steel);
+            margin: 0 0 16px 0;
+        }
+        .panel-results{ flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 18px; }
+
+        .slider-box{ margin-bottom: 18px; }
+        .slider-box:last-child{ margin-bottom: 0; }
+        .slider-box label{
+            display: flex; justify-content: space-between;
+            font-weight: 600; font-size: 13.5px; margin-bottom: 7px; color: var(--navy-2);
+        }
+        .slider-box label span{
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--good);
+            font-weight: 600;
+        }
+        input[type=range]{
+            width: 100%; height: 5px; background: #c7d6e0;
+            border-radius: 4px; outline: none; cursor: pointer;
+            -webkit-appearance: none; appearance: none;
+        }
+        input[type=range]::-webkit-slider-thumb{
+            -webkit-appearance: none;
+            width: 17px; height: 17px; border-radius: 50%;
+            background: var(--navy);
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px var(--steel);
+            cursor: pointer;
+        }
+        input[type=range]:focus-visible{ outline: 2px solid var(--sun-deep); outline-offset: 3px; }
+
+        /* Dashboard */
+        .dashboard{
+            background: linear-gradient(160deg, var(--navy), var(--navy-2));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex; justify-content: space-around; text-align: center;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.35);
+        }
+        .metric{ flex: 1; }
+        .metric-title{
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10.5px; text-transform: uppercase; color: #9fb4c6;
+            margin-bottom: 6px; letter-spacing: 0.08em;
+        }
+        .metric-number{
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 27px; font-weight: 700; color: var(--sun);
+            font-variant-numeric: tabular-nums;
+        }
+        .metric-unit{ font-size: 14px; color: #cbd8e4; font-weight: 500; }
+
+        /* Escena animada */
+        .canvas-box{
+            border: 1px solid var(--line); border-radius: 12px; height: 195px;
+            background: linear-gradient(to bottom, #bfe4fb, #edf8ff);
+            position: relative; overflow: hidden;
+        }
+        .sun{
+            position: absolute; width: 44px; height: 44px; background: var(--sun);
+            border-radius: 50%; box-shadow: 0 0 25px var(--sun); top: 24px;
+            transition: left 0.3s ease;
+        }
+        .pv-panel-container{
+            position: absolute; bottom: 34px; left: 50%; width: 140px; height: 14px;
+            background: #0f172a; border: 3px solid #334155; border-radius: 4px;
+            transform-origin: center center;
+        }
+        .pv-cells{
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(90deg, #1e40af, #1e40af 12px, #3b82f6 13px, #3b82f6 14px);
+            position: relative;
+        }
+        .shadow{ position: absolute; top:0; left:0; height:100%; background: rgba(0,0,0,0.6); width: 0%; transition: width 0.2s; }
+        .floor{ position: absolute; bottom: 0; left: 0; width: 100%; height: 34px; background: #64748b; }
+
+        /* Sección pedagógica */
+        .pedagogical-section{
+            background: var(--paper); border-top: 3px solid var(--navy);
+            padding: 22px 24px; border-radius: 12px; margin-top: 22px;
+        }
+        .pedagogical-section h2{
+            color: var(--navy); margin-top: 0; font-size: 17.5px;
+            border-bottom: 1px solid var(--line); padding-bottom: 9px;
+        }
+        .problem-box{
+            background: white; padding: 17px 19px; border-radius: 8px;
+            border-left: 4px solid var(--sun-deep); margin-bottom: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+        .problem-box h3{ margin: 0 0 8px 0; font-size: 15px; color: var(--sun-deep); }
+        .problem-box p{ margin: 0 0 10px 0; font-size: 14px; line-height: 1.55; color: #4a5b6b; }
+        .problem-box p:last-of-type{ margin-bottom: 0; }
+        .problem-box strong.consigna-label{
+            display: block; margin: 14px 0 8px 0; color: var(--navy);
+            font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .problem-box ol{ margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6; color: #4a5b6b; }
+        .problem-box ol li{ margin-bottom: 6px; }
+
+        details{
+            background: white; padding: 12px 17px; border-radius: 8px; cursor: pointer;
+            border: 1px solid var(--line); font-size: 14px; margin-bottom: 12px;
+        }
+        details:last-child{ margin-bottom: 0; }
+        details summary{ font-weight: 600; color: var(--navy); }
+        details summary:focus-visible{ outline: 2px solid var(--sun-deep); outline-offset: 3px; }
+        details p{ margin: 10px 0 0 0; color: var(--ink-soft); line-height: 1.55; }
+        details p:first-of-type{ margin-top: 12px; }
+
+        .formula-block{
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--navy);
+            color: #d7f4ff;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin: 8px 0 12px 0;
+            line-height: 1.7;
+            overflow-x: auto;
+        }
+        .formula-block .const{ color: var(--sun); }
+        .formula-block .var{ color: var(--sky); }
+
+        @media (max-width: 560px){
+            .wrapper{ padding: 22px 18px 28px; }
+            .brand-header{ flex-direction: column; align-items: flex-start; }
+            .academic-title{ text-align: left; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="brand-header">
+        <img src="logouflo.png" alt="Logo UFLO Universidad" class="brand-logo">
+        <div class="academic-title">Producción de materiales multimedia y con tecnologías emergentes</div>
+    </div>
+
+    <div class="title-section">
+        <h1>Simulador Fotovoltaico Off-Grid</h1>
+        <p class="sub">Entorno hipermedial interactivo para experimentación autónoma.</p>
+		<p class="sub">EL SIMULADOR INTERACTIVO COMO MATERIAL DIDÁCTICO HIPERMEDIAL: UNA PROPUESTA DE APRENDIZAJE BASADO EN PROBLEMAS PARA LA ENSEÑANZA DE LA ENERGÍA SOLAR FOTOVOLTAICA EN INGENIERÍA.</p>
+		        <span class="badge-preliminar">VERSIÓN PRELIMINAR</span>
+    </div>
+
+    <div class="main-layout">
+        <div class="panel-controls">
+            <h2>Variables de entrada</h2>
+            <div class="slider-box">
+                <label>Irradiancia Solar <span id="lblIrr">800</span>&nbsp;W/m²</label>
+                <input type="range" id="irr" min="0" max="1200" value="800" aria-label="Irradiancia solar en watts por metro cuadrado">
+            </div>
+            <div class="slider-box">
+                <label>Inclinación del Panel <span id="lblInc">30</span>°</label>
+                <input type="range" id="inc" min="0" max="90" value="30" aria-label="Inclinación del panel en grados">
+            </div>
+            <div class="slider-box">
+                <label>Orientación (Azimut) <span id="lblOri">180° (Sur)</span></label>
+                <input type="range" id="ori" min="0" max="360" value="180" aria-label="Orientación del panel en grados">
+            </div>
+            <div class="slider-box">
+                <label>Temperatura de Celda <span id="lblTem">25</span>&nbsp;°C</label>
+                <input type="range" id="tem" min="0" max="75" value="25" aria-label="Temperatura de la celda en grados Celsius">
+            </div>
+            <div class="slider-box">
+                <label>Sombreado de Celdas <span id="lblSom">0</span>%</label>
+                <input type="range" id="som" min="0" max="100" value="0" aria-label="Porcentaje de sombreado de las celdas">
+            </div>
+        </div>
+
+        <div class="panel-results">
+            <h2 style="margin-bottom:-4px;">Variables de salida</h2>
+            <div class="dashboard">
+                <div class="metric">
+                    <div class="metric-title">Tensión</div>
+                    <div class="metric-number"><span id="valV">0.0</span><span class="metric-unit"> V</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-title">Corriente</div>
+                    <div class="metric-number"><span id="valI">0.0</span><span class="metric-unit"> A</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-title">Potencia Final</div>
+                    <div class="metric-number"><span id="valP">0.0</span><span class="metric-unit"> W</span></div>
+                </div>
+            </div>
+
+            <div class="canvas-box">
+                <div id="vSun" class="sun"></div>
+                <div id="vPanel" class="pv-panel-container">
+                    <div class="pv-cells">
+                        <div id="vShadow" class="shadow"></div>
+                    </div>
+                </div>
+                <div class="floor"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pedagogical-section">
+        <h2>Desafíos de Aprendizaje Basado en Problemas (ABP)</h2>
+
+        <div class="problem-box">
+            <h3>Diagnóstico de una instalación fotovoltaica con bajo rendimiento</h3>
+            <p>Un cliente le informa que su sistema fotovoltaico recientemente instalado genera una potencia muy inferior a la esperada. Los módulos y los demás elementos se encuentran en buen estado y no se observan daños visibles, por lo que solicita un diagnóstico antes de realizar modificaciones o reemplazar componentes.</p>
+            <p>Como técnico especialista, debe determinar cuáles de las condiciones de instalación o de funcionamiento podrían estar provocando la disminución de la potencia generada.</p>
+            <p>Para ello, utilice el simulador para investigar diferentes hipótesis, analizar el comportamiento de las variables disponibles y elaborar un informe técnico fundamentado.</p>
+            <strong class="consigna-label">Consigna</strong>
+            <p>A partir de la información obtenida con el simulador:</p>
+            <ol>
+                <li>Identifique las variables que afectan significativamente la potencia generada.</li>
+                <li>Fundamente, mediante evidencias obtenidas en la simulación, por qué descarta otras posibles causas.</li>
+                <li>Elabore un diagnóstico técnico.</li>
+                <li>Proponga una recomendación para mejorar el rendimiento del sistema, justifique su decisión.</li>
+            </ol>
+        </div>
+
+        <details>
+            <summary>📖 Glosario Técnico de Consulta Rápida</summary>
+            <p><strong>Irradiancia:</strong> La potencia de la energía del sol por unidad de área que incide en el panel.</p>
+            <p><strong>Azimut/Orientación:</strong> El ángulo respecto al punto cardinal hacia donde mira el panel. En Argentina el óptimo es el Norte (0°).</p>
+            <p><strong>Inclinación:</strong> El ángulo del panel respecto al plano horizontal. Afecta cuánta radiación directa recibe la superficie según la época del año.</p>
+            <p><strong>Temperatura de celda:</strong> Temperatura de operación del panel. A mayor temperatura, disminuye la tensión de salida (efecto negativo sobre el voltaje de circuito abierto).</p>
+            <p><strong>Sombreado:</strong> Porcentaje de la superficie del panel cubierta por sombra. Reduce la corriente generada de forma no proporcional, afectando en particular a paneles conectados en serie.</p>
+            <p><strong>Tensión (V):</strong> Diferencia de potencial eléctrico generada por el panel, medida en volts.</p>
+            <p><strong>Corriente (A):</strong> Flujo de carga eléctrica generado por el panel, medido en amperes.</p>
+            <p><strong>Potencia (W):</strong> Producto de tensión por corriente; energía eléctrica generada por unidad de tiempo.</p>
+            <p><strong>Sistema Off-Grid:</strong> Instalación aislada de la red eléctrica pública que depende 100% de paneles y baterías.</p>
+        </details>
+
+        <details>
+            <summary>🧮 Fórmulas del Modelo de Simulación</summary>
+            <p>El simulador estima la tensión, corriente y potencia a partir de valores nominales de referencia y del efecto de cada variable sobre el panel:</p>
+            <div class="formula-block">
+V = <span class="const">Voc</span> + (T - 25) × <span class="const">Kv</span><br>
+I = (<span class="const">Isc</span> + (T - 25) × <span class="const">Ki</span>) × (Irr_efectiva / 1000) × (1 - Sombreado)<br>
+P = V × I
+            </div>
+            <p><strong>Voc</strong> (22.1 V) e <strong>Isc</strong> (8.8 A) son la tensión de circuito abierto y la corriente de cortocircuito nominales del panel, a 25 °C y 1000 W/m². <strong>Kv</strong> y <strong>Ki</strong> son los coeficientes de temperatura que describen cómo varían tensión y corriente al alejarse de esa temperatura de referencia. La irradiancia efectiva se ajusta según el ángulo entre el panel y el sol (inclinación y azimut); el sombreado actúa como un factor de reducción directa sobre la corriente.</p>
+        </details>
+    </div>
+</div>
+
+<script>
+    const Voc_nom = 22.1;
+    const Isc_nom = 8.8;
+    const Kv = -0.08;
+    const Ki = 0.005;
+
+    const inputs = ['irr', 'inc', 'ori', 'tem', 'som'];
+    const elements = {};
+    inputs.forEach(id => elements[id] = document.getElementById(id));
+
+    function calcular() {
+        const irr = parseFloat(elements.irr.value);
+        const inc = parseFloat(elements.inc.value);
+        const ori = parseFloat(elements.ori.value);
+        const tem = parseFloat(elements.tem.value);
+        const som = parseFloat(elements.som.value);
+
+        document.getElementById('lblIrr').textContent = irr;
+        document.getElementById('lblInc').textContent = inc;
+        document.getElementById('lblTem').textContent = tem;
+        document.getElementById('lblSom').textContent = som;
+
+        let orientacionTexto = "";
+        if (ori >= 135 && ori <= 225) orientacionTexto = " (Sur - Ineficiente)";
+        else if ((ori >= 0 && ori <= 45) || ori >= 315) orientacionTexto = " (Norte - Óptimo Arg)";
+        else if (ori > 45 && ori < 135) orientacionTexto = " (Este)";
+        else orientacionTexto = " (Oeste)";
+        document.getElementById('lblOri').textContent = ori + "°" + orientacionTexto;
+
+        const radInc = (inc - 34) * Math.PI / 180;
+        const radOri = (ori - 0) * Math.PI / 180;
+        const factorAngulo = Math.max(0.3, Math.cos(radInc) * Math.cos(radOri));
+
+        const irradianciaEfectiva = irr * factorAngulo;
+
+        const deltaT = tem - 25;
+        let vActual = Voc_nom + (deltaT * Kv);
+        if (vActual < 0) vActual = 0;
+
+        const factorSombra = (100 - som) / 100;
+        let iActual = (Isc_nom + (deltaT * Ki)) * (irradianciaEfectiva / 1000) * factorSombra;
+        if (irr === 0) iActual = 0;
+        if (iActual < 0) iActual = 0;
+
+        let V = iActual > 0 ? vActual * 0.82 : 0;
+        let I = iActual * 0.92;
+        let P = V * I;
+
+        document.getElementById('valV').textContent = V.toFixed(1);
+        document.getElementById('valI').textContent = I.toFixed(1);
+        document.getElementById('valP').textContent = P.toFixed(0);
+
+        document.getElementById('vPanel').style.transform = `translateX(-50%) rotate(${-inc}deg)`;
+        document.getElementById('vShadow').style.width = som + '%';
+
+        let posicionSol = ((ori / 360) * 100);
+        document.getElementById('vSun').style.left = `calc(${posicionSol}% - 22px)`;
+    }
+
+    inputs.forEach(id => elements[id].addEventListener('input', calcular));
+    calcular();
+</script>
+
+</body>
+</html>
